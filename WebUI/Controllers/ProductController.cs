@@ -51,7 +51,7 @@ public class ProductController : ControllerBase
         CancellationToken cancellationToken)
     {
         var userId = Guid.Parse(User.FindFirstValue("UserId"));
-        var product = await _updateProductUseCase.Create(id, request, userId, cancellationToken);
+        var product = await _updateProductUseCase.Update(id, request, userId, cancellationToken);
         return Ok(new CreateProductResponse(product));
     }
     

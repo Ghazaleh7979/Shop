@@ -108,4 +108,4 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-app.Run();
+app.Run(async (context) => await context.Response.WriteAsync("hiii"));

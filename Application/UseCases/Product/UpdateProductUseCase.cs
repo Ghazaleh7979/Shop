@@ -1,7 +1,6 @@
 ﻿using Application.IRepositories;
 using Application.Mappers;
 using Domain.Dtos;
-using Domain.Requests;
 using Domain.Requests.Product;
 
 namespace Application.UseCases.Product;
@@ -15,7 +14,7 @@ public sealed class UpdateProductUseCase
         _productRepository = productRepository;
     }
 
-    public async Task<ProductInfo> Create(Guid id, UpdateProductRequest request, Guid userId, CancellationToken cancellationToken)
+    public async Task<ProductInfo> Update(Guid id, UpdateProductRequest request, Guid userId, CancellationToken cancellationToken)
     {
         var product = await _productRepository.UpdateProduct(id, request, cancellationToken);
         if (userId != product.UserId)
@@ -25,5 +24,5 @@ public sealed class UpdateProductUseCase
         return product.ToProductInfo();
     }
 
-    
+
 }
