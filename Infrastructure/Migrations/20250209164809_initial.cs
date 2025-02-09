@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Infrastructure.Migrations
 {
-    public partial class Initial : Migration
+    public partial class initial : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -20,12 +20,12 @@ namespace Infrastructure.Migrations
                 schema: "User",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    Email = table.Column<string>(type: "text", unicode: false, nullable: false),
-                    Username = table.Column<string>(type: "text", unicode: false, nullable: false),
-                    PasswordHash = table.Column<string>(type: "text", unicode: false, nullable: false),
-                    InsertTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Email = table.Column<string>(type: "varchar(max)", unicode: false, nullable: false),
+                    Username = table.Column<string>(type: "varchar(900)", unicode: false, nullable: false),
+                    PasswordHash = table.Column<string>(type: "varchar(max)", unicode: false, nullable: false),
+                    InsertTime = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -37,14 +37,14 @@ namespace Infrastructure.Migrations
                 schema: "Product",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    Name = table.Column<string>(type: "text", nullable: false),
-                    ProduceDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    ManufacturePhone = table.Column<string>(type: "text", nullable: false),
-                    ManufactureEmail = table.Column<string>(type: "text", nullable: false),
-                    IsAvailable = table.Column<bool>(type: "boolean", nullable: false),
-                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
-                    UserId = table.Column<Guid>(type: "uuid", nullable: false)
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ProduceDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ManufacturePhone = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ManufactureEmail = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    IsAvailable = table.Column<bool>(type: "bit", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
