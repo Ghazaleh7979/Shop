@@ -5,7 +5,7 @@ using Domain.Models;
 using Domain.Requests.Product;
 using Moq;
 
-namespace Test
+namespace TestShop
 {
     public class CreateProductUseCaseTest
     {

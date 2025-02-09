@@ -4,7 +4,7 @@ using Domain.Dtos;
 using Domain.Models;
 using Moq;
 
-namespace Test
+namespace TestShop
 {
     public class GetProductUseCaseTest
     {
