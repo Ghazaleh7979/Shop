@@ -6,9 +6,11 @@ using Application.UseCases.User;
 using Infrastructure.Database;
 using Infrastructure.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using StackExchange.Redis;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -17,6 +19,10 @@ builder.Services.AddControllers();
 
 builder.Services.AddDbContext<BasicDatabase>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+var redisConnection = builder.Configuration["Redis:ConnectionString"];
+var redis = ConnectionMultiplexer.Connect(redisConnection);
+builder.Services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect("localhost"));
 
 #region Repositories
 
@@ -103,6 +109,15 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+//cache with redis
+app.MapGet("/", async ([FromServices] IConnectionMultiplexer redis) =>
+{
+    var db = redis.GetDatabase();
+    await db.StringSetAsync("testKey", "Hello Redis!");
+    var value = await db.StringGetAsync("testKey");
+    return Results.Ok(value.ToString());
+});
+
 app.UseAuthentication();
 app.UseAuthorization();
 

@@ -1,20 +1,22 @@
 ﻿using Application.IRepositories;
 using Domain.Models;
-using Domain.Requests;
 using Domain.Requests.Product;
 using Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Query;
+using Newtonsoft.Json;
+using StackExchange.Redis;
 
 namespace Infrastructure.Repositories;
 
 public class ProductRepository : IProductRepository
 {
     private readonly BasicDatabase _database;
+    private readonly IConnectionMultiplexer _redis;
 
-    public ProductRepository(BasicDatabase database)
+    public ProductRepository(BasicDatabase database, IConnectionMultiplexer redis)
     {
         _database = database;
+        _redis = redis;
     }
 
     public async Task<Product> CreateProduct(CreateProductRequest request, Guid userId,
@@ -61,6 +63,18 @@ public class ProductRepository : IProductRepository
     public async Task<(List<Product>, int)> GetProducts(ProductQueryParameter parameter,
         CancellationToken cancellationToken)
     {
+        #region Redis
+        var db = _redis.GetDatabase();
+        string key = $"Products : User : {parameter.UserId},{parameter.Take},{parameter.Skip}";
+
+        var cachedProduct = await db.StringGetAsync(key);
+        if (cachedProduct.HasValue)
+        {
+            var response = JsonConvert.DeserializeObject<List<Product>>(cachedProduct);
+            return (response, response.Count);
+        }
+        #endregion
+
         var queryableProduct = _database.Products!
             .Include(product => product.User)
             .AsQueryable();
@@ -71,11 +85,16 @@ public class ProductRepository : IProductRepository
 
         if (parameter.Skip != 0) queryableProduct = queryableProduct.Skip(parameter.Skip);
         if (parameter.Take != 0) queryableProduct = queryableProduct.Take(parameter.Take);
-        
-        queryableProduct = queryableProduct.OrderBy(product => product.ProduceDate);
 
+        queryableProduct = queryableProduct.OrderBy(product => product.ProduceDate);
+        var products = await queryableProduct.ToListAsync(cancellationToken);
+        string json = JsonConvert.SerializeObject(products, new JsonSerializerSettings
+        {
+            ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+        });
+        await db.StringSetAsync(key, json);
         var total = await queryableProduct.CountAsync(cancellationToken);
-        return (await queryableProduct.ToListAsync(cancellationToken), total);
+        return (products, total);
     }
 
     public async Task DeleteProduct(Guid id, CancellationToken cancellationToken)
